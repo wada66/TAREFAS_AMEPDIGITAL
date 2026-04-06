@@ -1,0 +1,131 @@
+/* Cores dos status */
+.status-atrasado { background-color: #dc3545 !important; color: white; }
+.status-concluido { background-color: #28a745 !important; color: white; }
+.status-em-andamento { background-color: #ffc107 !important; color: #000; }
+.status-nao-iniciado { background-color: #007bff !important; color: white; }
+.status-pausado { background-color: #6c757d !important; color: white; }
+.status-reuniao { background-color: #8b4513 !important; color: white; }
+.status-treinamento { background-color: #9b59b6 !important; color: white; }
+
+/* Estilo do Gantt */
+.gantt-container {
+    font-size: 12px;
+}
+
+.gantt-header {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.gantt-dia {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    border-left: 1px solid #eee;
+    font-weight: 500;
+}
+
+.gantt-dia.weekend {
+    background-color: #f0f0f0;
+    color: #999;
+}
+
+.gantt-dia.today {
+    background-color: #ffe6b3;
+    font-weight: bold;
+}
+
+.gantt-linha {
+    display: flex;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.gantt-linha:hover {
+    background-color: #f8f9fa;
+}
+
+.gantt-linha.destacada {
+    background-color: #fff3cd;
+    border-left: 3px solid #ffc107;
+}
+
+.gantt-tarefa-info {
+    width: 250px;
+    padding: 8px;
+    flex-shrink: 0;
+    border-right: 1px solid #ddd;
+}
+
+.gantt-barras {
+    flex: 1;
+    position: relative;
+    min-height: 50px;
+}
+
+.gantt-barra {
+    position: absolute;
+    height: 30px;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform 0.2s;
+    top: 10px;
+}
+
+.gantt-barra:hover {
+    transform: scaleY(1.1);
+    z-index: 20;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Lista de tarefas */
+.tarefa-item {
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.tarefa-item:hover {
+    transform: translateX(5px);
+    background-color: #f8f9fa;
+}
+
+.tarefa-item.destacada {
+    background-color: #fff3cd;
+    border-left-color: #ffc107;
+}
+
+.tarefa-acoes {
+    visibility: hidden;
+}
+
+.tarefa-item:hover .tarefa-acoes {
+    visibility: visible;
+}
+
+/* Modo expandido */
+.expandido-lista #panelCalendario {
+    display: none;
+}
+
+.expandido-lista #panelTarefas {
+    width: 100%;
+}
+
+.expandido-calendario #panelTarefas {
+    display: none;
+}
+
+.expandido-calendario #panelCalendario {
+    width: 100%;
+}

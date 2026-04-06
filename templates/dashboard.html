@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid vh-100 d-flex flex-column">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">📅 Agenda de Tarefas</a>
+            <div class="ms-auto">
+                <span class="text-white me-3">
+                    <i class="fas fa-user"></i> {{ user_name }} 
+                    ({{ 'Admin' if user_type == 'admin' else 'Técnico' }})
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </a>
+                {% if user_type == 'admin' %}
+                <button class="btn btn-success btn-sm ms-2" id="btnNovaTarefa">
+                    <i class="fas fa-plus"></i> Nova Tarefa
+                </button>
+                <a href="/export/csv" class="btn btn-info btn-sm ms-2">
+                    <i class="fas fa-download"></i> Exportar CSV
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Layout principal com dois painéis -->
+    <div class="row flex-grow-1 m-0" id="mainLayout">
+        <!-- Painel esquerdo: Lista de tarefas -->
+        <div class="col-md-4 p-0 border-end" id="panelTarefas">
+            <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
+                <h5 class="mb-0"><i class="fas fa-tasks"></i> Lista de Tarefas</h5>
+                <button class="btn btn-sm btn-outline-secondary" id="expandirListaBtn">
+                    <i class="fas fa-expand-alt"></i> Expandir Lista
+                </button>
+            </div>
+            <div id="listaTarefas" class="p-2" style="height: calc(100vh - 120px); overflow-y: auto;">
+                <!-- Tarefas serão carregadas via JS -->
+                <div class="text-center text-muted mt-5">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando...
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel direito: Calendário Gantt -->
+        <div class="col-md-8 p-0" id="panelCalendario">
+            <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
+                <div>
+                    <button class="btn btn-sm btn-outline-primary me-2" id="mesAnteriorBtn">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span id="mesAnoAtual" class="h5 mb-0">Abril 2026</span>
+                    <button class="btn btn-sm btn-outline-primary ms-2" id="proximoMesBtn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" id="expandirCalendarioBtn">
+                    <i class="fas fa-expand-alt"></i> Expandir Calendário
+                </button>
+            </div>
+            <div id="calendarioGantt" class="p-2" style="height: calc(100vh - 120px); overflow-y: auto; overflow-x: auto;">
+                <!-- Calendário será renderizado via JS -->
+                <div class="text-center text-muted mt-5">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando calendário...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Tarefa (Novo/Editar) - apenas para admin -->
+{% if user_type == 'admin' %}
+<div class="modal fade" id="modalTarefa" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitulo">Nova Tarefa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formTarefa">
+                    <input type="hidden" id="tarefaId" value="">
+                    
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">1. Nome da Tarefa: *</label>
+                        <input type="text" class="form-control" id="nome" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">2. Descrição Detalhada da Tarefa: *</label>
+                        <textarea class="form-control" id="descricao" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="responsavel" class="form-label">3. Responsável pela Tarefa (Selecione o principal responsável): *</label>
+                        <select class="form-select" id="responsavel" required>
+                            <option value="AMEP">AMEP</option>
+                            <option value="IMAGEM">IMAGEM</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="participantes" class="form-label">4. Participantes: *</label>
+                        <textarea class="form-control" id="participantes" rows="2" placeholder="Nomes separados por vírgula" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="data_inicio" class="form-label">5. Data de Início Prevista: *</label>
+                        <input type="date" class="form-control" id="data_inicio" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="duracao" class="form-label">6. Duração Estimada (em dias úteis): *</label>
+                        <input type="number" class="form-control" id="duracao" min="1" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="prioridade" class="form-label">7. Prioridade da Tarefa: *</label>
+                        <select class="form-select" id="prioridade" required>
+                            <option value="Alta">Alta (Crítica para o projeto)</option>
+                            <option value="Media">Média (Importante, mas pode ser adiada)</option>
+                            <option value="Baixa">Baixa (Melhoria ou tarefa de suporte)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="status" class="form-label">8. Status Atual da Tarefa: *</label>
+                        <select class="form-select" id="status" required>
+                            <option value="Atrasado">Atrasado</option>
+                            <option value="Concluido">Concluído</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Nao Iniciado">Não Iniciado</option>
+                            <option value="Pausado">Pausado</option>
+                            <option value="Reuniao">Reunião</option>
+                            <option value="Treinamento">Treinamento</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="salvarTarefaBtn">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Modal de Detalhes da Tarefa (para todos usuários) -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes da Tarefa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="detalhesConteudo">
+                    <!-- Conteúdo carregado via JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Passa o tipo de usuário para o JavaScript
+    window.userType = '{{ user_type }}';
+</script>
+{% endblock %}
