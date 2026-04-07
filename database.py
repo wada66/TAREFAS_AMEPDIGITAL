@@ -42,8 +42,19 @@ def get_all_tarefas():
             SELECT id, nome, descricao, link_externo, responsavel, participantes,
                    data_inicio, duracao_dias_uteis, data_fim, prioridade, status
             FROM tarefas
-            ORDER BY data_inicio
-        """)
+            ORDER BY 
+                CASE status
+                WHEN 'Atrasado' THEN 1
+                WHEN 'Em Andamento' THEN 2
+                WHEN 'Nao Iniciado' THEN 3
+                WHEN 'Reuniao' THEN 4
+                WHEN 'Treinamento' THEN 5
+                WHEN 'Pausado' THEN 6
+                WHEN 'Concluido' THEN 7
+                ELSE 8
+            END,
+            data_inicio
+    """)
         return [{
             'id': row[0], 'nome': row[1], 'descricao': row[2], 'link_externo': row[3],
             'responsavel': row[4], 'participantes': row[5], 'data_inicio': row[6],

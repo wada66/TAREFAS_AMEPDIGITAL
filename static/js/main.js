@@ -176,9 +176,15 @@ function renderizarCalendarioGantt() {
     const inicioMes = new Date(currentYear, currentMonth, 1);
     const fimMes = new Date(currentYear, currentMonth + 1, 0);
     
+    // Ajustar para comparar apenas datas (sem hora)
+    inicioMes.setHours(0, 0, 0, 0);
+    fimMes.setHours(23, 59, 59, 999);
+    
     const tarefasMes = tarefas.filter(t => {
         const dataInicio = new Date(t.data_inicio);
         const dataFim = new Date(t.data_fim);
+        dataInicio.setHours(0, 0, 0, 0);
+        dataFim.setHours(23, 59, 59, 999);
         return (dataInicio <= fimMes && dataFim >= inicioMes);
     });
     
@@ -187,12 +193,14 @@ function renderizarCalendarioGantt() {
         return;
     }
     
+    // Definir largura fixa por dia (em pixels)
+    const larguraPorDia = 120; // Aumentado para melhor visualização
+    
     // Gerar cabeçalho com dias do mês
     const diasNoMes = getDiasNoMes(currentYear, currentMonth);
-    const primeiroDiaSemana = inicioMes.getDay();
     
-    let html = `<div class="gantt-container">
-        <div class="gantt-header" style="margin-left: 250px;">`;
+    let html = `<div class="gantt-container" style="min-width: ${(diasNoMes * larguraPorDia) + 250}px;">
+        <div class="gantt-header" style="display: flex; margin-left: 250px;">`;
     
     for (let i = 0; i < diasNoMes; i++) {
         const data = new Date(currentYear, currentMonth, i + 1);
@@ -200,8 +208,8 @@ function renderizarCalendarioGantt() {
         const isToday = isDataHoje(data);
         const diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][data.getDay()];
         
-        html += `<div class="gantt-dia ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}">
-                    <div>${diaSemana}</div>
+        html += `<div class="gantt-dia" style="width: ${larguraPorDia}px; flex-shrink: 0; text-align: center; padding: 8px 4px; border-left: 1px solid #eee; ${isWeekend ? 'background-color: #f0f0f0;' : ''} ${isToday ? 'background-color: #ffe6b3; font-weight: bold;' : ''}">
+                    <div style="font-size: 11px;">${diaSemana}</div>
                     <div><strong>${i + 1}</strong></div>
                 </div>`;
     }
@@ -212,23 +220,38 @@ function renderizarCalendarioGantt() {
     tarefasMes.forEach(tarefa => {
         const dataInicio = new Date(tarefa.data_inicio);
         const dataFim = new Date(tarefa.data_fim);
-        const inicioOffset = getDiferencaDias(inicioMes, dataInicio);
-        const duracao = getDiferencaDias(dataInicio, dataFim) + 1;
-        const larguraPorDia = 100; // pixels por dia
-        const leftPos = Math.max(0, inicioOffset) * larguraPorDia;
-        const largura = Math.min(duracao, diasNoMes - inicioOffset) * larguraPorDia;
+        
+        // Calcular offset em dias desde o início do mês
+        let inicioOffset = Math.floor((dataInicio - inicioMes) / (1000 * 60 * 60 * 24));
+        
+        // Se a tarefa começa antes do mês atual, o offset é 0
+        if (inicioOffset < 0) {
+            inicioOffset = 0;
+        }
+        
+        // Calcular duração em dias
+        const duracao = Math.floor((dataFim - dataInicio) / (1000 * 60 * 60 * 24)) + 1;
+        
+        // Calcular quantos dias da tarefa estão dentro do mês
+        let diasVisiveis = duracao;
+        if (inicioOffset + duracao > diasNoMes) {
+            diasVisiveis = diasNoMes - inicioOffset;
+        }
+        
+        const leftPos = inicioOffset * larguraPorDia;
+        const largura = diasVisiveis * larguraPorDia;
         
         const statusClass = getStatusClass(tarefa.status);
         
         html += `
-            <div class="gantt-linha" data-id="${tarefa.id}" onclick="destacarTarefaNaLista(${tarefa.id})">
-                <div class="gantt-tarefa-info">
+            <div class="gantt-linha" data-id="${tarefa.id}" style="display: flex; border-bottom: 1px solid #eee; cursor: pointer;" onclick="destacarTarefaNaLista(${tarefa.id})">
+                <div class="gantt-tarefa-info" style="width: 250px; padding: 8px; flex-shrink: 0; border-right: 1px solid #ddd;">
                     <strong>${escapeHtml(tarefa.nome)}</strong><br>
                     <small>${tarefa.responsavel} | ${formatDate(tarefa.data_inicio)}</small>
                 </div>
-                <div class="gantt-barras" style="position: relative;">
+                <div class="gantt-barras" style="flex: 1; position: relative; min-height: 60px;">
                     <div class="gantt-barra ${statusClass}" 
-                         style="left: ${leftPos}px; width: ${largura}px;"
+                         style="position: absolute; left: ${leftPos}px; width: ${Math.max(largura, 20)}px; height: 30px; border-radius: 4px; padding: 4px 8px; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; top: 15px;"
                          onclick="event.stopPropagation(); destacarTarefaNaLista(${tarefa.id})">
                         ${escapeHtml(tarefa.nome)}
                     </div>
@@ -241,7 +264,6 @@ function renderizarCalendarioGantt() {
     $('#calendarioGantt').html(html);
     $('#mesAnoAtual').text(getNomeMes(currentMonth) + ' ' + currentYear);
 }
-
 function navegarMes(delta) {
     currentMonth += delta;
     if (currentMonth < 0) {
