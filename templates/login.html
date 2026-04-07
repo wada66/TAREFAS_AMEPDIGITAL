@@ -9,21 +9,83 @@
                     <h3 class="text-center mb-0">Agenda de Tarefas</h3>
                 </div>
                 <div class="card-body">
-                    <form method="POST">
+                    {% if erro %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ erro }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="POST" id="loginForm">
                         <div class="mb-3">
                             <label for="nome" class="form-label">Selecione seu nome:</label>
                             <select class="form-select" name="nome" id="nome" required>
                                 <option value="">Escolha...</option>
                                 {% for usuario in usuarios %}
-                                <option value="{{ usuario.nome }}">{{ usuario.nome }}</option>
+                                <option value="{{ usuario.nome }}" data-primeiro-acesso="{{ usuario.primeiro_acesso|default('true')|lower }}">
+                                    {{ usuario.nome }}
+                                </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                        
+                        <!-- Campo senha - será mostrado/ocultado via JS -->
+                        <div class="mb-3" id="campoSenha" style="display: none;">
+                            <label for="senha" class="form-label">Senha:</label>
+                            <input type="password" class="form-control" name="senha" id="senha">
+                        </div>
+                        
+                        <!-- Mensagem para primeiro acesso -->
+                        <div class="mb-3" id="msgPrimeiroAcesso" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> 
+                                Este é seu primeiro acesso! Clique em "Continuar" para definir sua senha.
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100" id="btnSubmit">
+                            Entrar
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+// Lista de usuários que já têm senha (vinda do backend)
+const usuariosComSenha = {{ usuarios_com_senha|tojson }};
+
+document.getElementById('nome').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const nome = this.value;
+    
+    if (!nome) {
+        document.getElementById('campoSenha').style.display = 'none';
+        document.getElementById('msgPrimeiroAcesso').style.display = 'none';
+        document.getElementById('btnSubmit').innerHTML = 'Entrar';
+        return;
+    }
+    
+    // Verificar se o usuário já tem senha
+    const usuario = usuariosComSenha.find(u => u.nome === nome);
+    const temSenha = usuario && !usuario.primeiro_acesso;
+    
+    if (temSenha) {
+        // Usuário já tem senha - pedir senha
+        document.getElementById('campoSenha').style.display = 'block';
+        document.getElementById('msgPrimeiroAcesso').style.display = 'none';
+        document.getElementById('senha').required = true;
+        document.getElementById('btnSubmit').innerHTML = 'Entrar';
+    } else {
+        // Primeiro acesso - não pedir senha
+        document.getElementById('campoSenha').style.display = 'none';
+        document.getElementById('msgPrimeiroAcesso').style.display = 'block';
+        document.getElementById('senha').required = false;
+        document.getElementById('senha').value = '';
+        document.getElementById('btnSubmit').innerHTML = 'Continuar para definir senha';
+    }
+});
+</script>
 {% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="text-center mb-0">Primeiro Acesso</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-center">Olá, <strong>{{ nome }}</strong>!</p>
+                    <p class="text-center">Por favor, defina sua senha para continuar.</p>
+                    
+                    {% if erro %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ erro }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="senha" class="form-label">Nova Senha (mínimo 6 caracteres):</label>
+                            <input type="password" class="form-control" name="senha" id="senha" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmar_senha" class="form-label">Confirmar Senha:</label>
+                            <input type="password" class="form-control" name="confirmar_senha" id="confirmar_senha" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Definir Senha e Entrar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

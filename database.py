@@ -28,10 +28,16 @@ def get_usuario_by_nome(nome):
         conn.close()
 
 def get_all_usuarios():
+    """Retorna todos os usuários para tela de login (inclui status de primeiro acesso)"""
     conn = get_db_connection()
     try:
-        result = conn.run("SELECT nome, tipo FROM usuarios ORDER BY nome")
-        return [{'nome': row[0], 'tipo': row[1]} for row in result]
+        result = conn.run("""
+            SELECT nome, tipo, 
+                   CASE WHEN senha_hash IS NULL OR primeiro_acesso = TRUE THEN TRUE ELSE FALSE END as primeiro_acesso
+            FROM usuarios 
+            ORDER BY nome
+        """)
+        return [{'nome': row[0], 'tipo': row[1], 'primeiro_acesso': row[2]} for row in result]
     finally:
         conn.close()
 
@@ -174,3 +180,94 @@ def calcular_data_fim(data_inicio_str, dias_uteis):
             dias_contados += 1
     
     return data_atual.strftime('%Y-%m-%d')
+
+def create_user_senha(nome, senha_hash):
+    """Cria novo usuário com senha (para primeiro acesso)"""
+    conn = get_db_connection()
+    try:
+        conn.run("""
+            INSERT INTO usuarios (nome, tipo, senha_hash, primeiro_acesso, senha_alterada_em)
+            VALUES (:nome, 'tecnico', :senha_hash, FALSE, CURRENT_TIMESTAMP)
+        """, nome=nome, senha_hash=senha_hash)
+    finally:
+        conn.close()
+
+def get_usuario_com_senha(nome):
+    """Busca usuário incluindo informações de senha"""
+    conn = get_db_connection()
+    try:
+        result = conn.run("""
+            SELECT id, nome, tipo, senha_hash, primeiro_acesso, senha_alterada_em
+            FROM usuarios 
+            WHERE nome = :nome
+        """, nome=nome)
+        if result:
+            row = result[0]
+            return {
+                'id': row[0], 'nome': row[1], 'tipo': row[2],
+                'senha_hash': row[3], 'primeiro_acesso': row[4],
+                'senha_alterada_em': row[5]
+            }
+        return None
+    finally:
+        conn.close()
+
+def atualizar_senha(usuario_id, nova_senha_hash):
+    """Atualiza a senha do usuário e marca primeiro_acesso = FALSE"""
+    conn = get_db_connection()
+    try:
+        conn.run("""
+            UPDATE usuarios 
+            SET senha_hash = :senha_hash, 
+                primeiro_acesso = FALSE, 
+                senha_alterada_em = CURRENT_TIMESTAMP
+            WHERE id = :id
+        """, id=usuario_id, senha_hash=nova_senha_hash)
+    finally:
+        conn.close()
+
+def resetar_senha(usuario_id):
+    """Reseta a senha do usuário (força primeiro_acesso = TRUE)"""
+    conn = get_db_connection()
+    try:
+        # Remove a senha existente e marca primeiro acesso
+        conn.run("""
+            UPDATE usuarios 
+            SET senha_hash = NULL, 
+                primeiro_acesso = TRUE, 
+                senha_alterada_em = NULL
+            WHERE id = :id
+        """, id=usuario_id)
+    finally:
+        conn.close()
+
+def get_all_usuarios_com_senha():
+    """Retorna todos os usuários com informações de senha (para admin)"""
+    conn = get_db_connection()
+    try:
+        result = conn.run("""
+            SELECT id, nome, tipo, primeiro_acesso, senha_alterada_em
+            FROM usuarios 
+            ORDER BY nome
+        """)
+        return [{'id': row[0], 'nome': row[1], 'tipo': row[2], 
+                 'primeiro_acesso': row[3], 'senha_alterada_em': row[4]} 
+                for row in result]
+    finally:
+        conn.close()
+        
+def get_usuario_by_id(usuario_id):
+    """Busca usuário pelo ID"""
+    conn = get_db_connection()
+    try:
+        result = conn.run("SELECT id, nome, tipo FROM usuarios WHERE id = :id", id=usuario_id)
+        if result:
+            row = result[0]
+            return {
+                'id': row[0],
+                'nome': row[1],
+                'tipo': row[2]
+            }
+        return None
+    finally:
+        conn.close()
