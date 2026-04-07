@@ -38,11 +38,23 @@
     <!-- Layout principal com dois painéis -->
     <div class="row flex-grow-1 m-0" id="mainLayout">
         <!-- Painel esquerdo: Lista de tarefas -->
-        <div class="col-md-4 p-0 border-end" id="panelTarefas">
+        <div class="col-md-3 p-0 border-end" id="panelTarefas">
             <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
                 <h5 class="mb-0"><i class="fas fa-tasks"></i> Lista de Tarefas</h5>
                 <button class="btn btn-sm btn-outline-secondary" id="expandirListaBtn">
                     <i class="fas fa-expand-alt"></i> Expandir Lista
+                </button>
+            </div>
+            <!-- ADICIONAR ESTE BLOCO DE BUSCA AQUI -->
+            <div class="p-2 border-bottom">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchTarefaInput" placeholder="Buscar tarefa por nome...">
+                    <button class="btn btn-outline-primary" id="btnBuscarTarefa" type="button">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+                <button class="btn btn-sm btn-link text-muted mt-1" id="btnLimparBusca" style="display: none;">
+                    <i class="fas fa-times"></i> Limpar busca
                 </button>
             </div>
             <div id="listaTarefas" class="p-2" style="height: calc(100vh - 120px); overflow-y: auto;">

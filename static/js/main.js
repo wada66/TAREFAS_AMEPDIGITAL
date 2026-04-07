@@ -2,13 +2,50 @@ let tarefas = [];
 let currentDate = new Date();
 let currentMonth = currentDate.getMonth();
 let currentYear = currentDate.getFullYear();
+let searchTerm = '';  // <-- ADICIONAR ESTA LINHA
 
+// Filtrar tarefas por nome
+function filtrarTarefasPorNome() {
+    if (!searchTerm) return tarefas;
+    
+    return tarefas.filter(tarefa => 
+        tarefa.nome.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+}
 // Inicialização
 $(document).ready(function() {
     carregarTarefas();
     
     $('#mesAnteriorBtn').click(() => navegarMes(-1));
     $('#proximoMesBtn').click(() => navegarMes(1));
+
+        // ADICIONAR ESTES EVENTOS DE BUSCA
+    $('#btnBuscarTarefa').click(function() {
+        searchTerm = $('#searchTarefaInput').val();
+        renderizarListaTarefas();
+        
+        // Mostrar botão de limpar se houver busca
+        if (searchTerm) {
+            $('#btnLimparBusca').show();
+        } else {
+            $('#btnLimparBusca').hide();
+        }
+    });
+    
+    $('#btnLimparBusca').click(function() {
+        searchTerm = '';
+        $('#searchTarefaInput').val('');
+        renderizarListaTarefas();
+        $(this).hide();
+    });
+    
+    // Buscar ao pressionar Enter
+    $('#searchTarefaInput').on('keypress', function(e) {
+        if (e.which === 13) {
+            $('#btnBuscarTarefa').click();
+        }
+    });
+    
     
     if (window.userType === 'admin') {
         $('#btnNovaTarefa').click(() => abrirModalTarefa());
@@ -30,29 +67,39 @@ function carregarTarefas() {
 
 function renderizarListaTarefas() {
     const container = $('#listaTarefas');
-    if (tarefas.length === 0) {
-        container.html('<div class="text-center text-muted mt-5">Nenhuma tarefa cadastrada</div>');
+    
+    // USAR TAREFAS FILTRADAS
+    const tarefasFiltradas = filtrarTarefasPorNome();
+    
+    if (tarefasFiltradas.length === 0) {
+        if (searchTerm) {
+            container.html('<div class="text-center text-muted mt-5">Nenhuma tarefa encontrada para "' + searchTerm + '"</div>');
+        } else {
+            container.html('<div class="text-center text-muted mt-5">Nenhuma tarefa cadastrada</div>');
+        }
         return;
     }
     
     let html = '<div class="list-group">';
-    tarefas.forEach(tarefa => {
+    tarefasFiltradas.forEach(tarefa => {
         const statusClass = getStatusClass(tarefa.status);
+        // Destacar o termo buscado no nome da tarefa
+        let nomeExibido = escapeHtml(tarefa.nome);
+        if (searchTerm) {
+            const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
+            nomeExibido = nomeExibido.replace(regex, '<mark class="bg-warning">$1</mark>');
+        }
+        
         html += `
             <div class="list-group-item tarefa-item" data-id="${tarefa.id}">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="flex-grow-1" onclick="destacarTarefaNoGantt(${tarefa.id})">
-                        <h6 class="mb-1">${escapeHtml(tarefa.nome)}</h6>
+                        <h6 class="mb-1">${nomeExibido}</h6>
                         <small class="text-muted">
                             <i class="fas fa-user"></i> ${tarefa.responsavel} |
                             <i class="fas fa-calendar"></i> ${formatDate(tarefa.data_inicio)} a ${formatDate(tarefa.data_fim)} |
                             <span class="badge ${statusClass}">${tarefa.status}</span>
                         </small>
-                        <div class="mt-1">
-                            <button class="btn btn-sm btn-link text-info p-0 me-2" onclick="event.stopPropagation(); verDetalhes(${tarefa.id})">
-                                <i class="fas fa-info-circle"></i> Ver Detalhes
-                            </button>
-                        </div>
                     </div>
                     ${window.userType === 'admin' ? `
                         <div class="tarefa-acoes">
@@ -449,4 +496,7 @@ function escapeHtml(text) {
         if (m === '>') return '&gt;';
         return m;
     });
+}
+function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
