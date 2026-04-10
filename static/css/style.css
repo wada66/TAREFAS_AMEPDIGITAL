@@ -49,9 +49,8 @@ body, p, span, div, button, input, .tarefa-item, .gantt-tarefa-info, .badge, .bt
 }
 
 .gantt-dia.today {
-    background: #fff3cd;
+    background: #cdffd8;
     font-weight: bold;
-    color: #856404;
 }
 
 .gantt-linha {
@@ -315,4 +314,3 @@ body, p, span, div, button, input, .tarefa-item, .gantt-tarefa-info, .badge, .bt
 .tarefa-item h6[title] {
     cursor: help;
 }
-
