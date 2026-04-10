@@ -94,7 +94,7 @@ function renderizarListaTarefas() {
             <div class="list-group-item tarefa-item" data-id="${tarefa.id}">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="flex-grow-1" onclick="destacarTarefaNoGantt(${tarefa.id})">
-                        <h6 class="mb-1">${nomeExibido}</h6>
+                        <h6 style="margin: 0 0 4px 0;" title="${escapeHtml(tarefa.nome)}">${nomeExibido}</h6>
                         <small class="text-muted">
                             <i class="fas fa-user"></i> ${tarefa.responsavel} |
                             <i class="fas fa-calendar"></i> ${formatDate(tarefa.data_inicio)} a ${formatDate(tarefa.data_fim)} |
@@ -103,12 +103,17 @@ function renderizarListaTarefas() {
                     </div>
                     ${window.userType === 'admin' ? `
                         <div class="tarefa-acoes">
-                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); editarTarefa(${tarefa.id})">
-                                <i class="fas fa-edit"></i>
+                            <button class="btn-detalhes" onclick="event.stopPropagation(); verDetalhes(${tarefa.id})" title="Ver detalhes">
+                                <i class="fas fa-info-circle"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); excluirTarefa(${tarefa.id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            ${window.userType === 'admin' ? `
+                                <button class="btn" onclick="event.stopPropagation(); editarTarefa(${tarefa.id})" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn" onclick="event.stopPropagation(); excluirTarefa(${tarefa.id})" title="Excluir">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
                         </div>
                     ` : ''}
                 </div>
@@ -117,6 +122,7 @@ function renderizarListaTarefas() {
     });
     html += '</div>';
     container.html(html);
+
 }
 
 // Nova função para ver detalhes da tarefa
@@ -219,11 +225,8 @@ function renderizarCalendarioGantt() {
         return;
     }
     
-    // Filtrar tarefas que intersectam o mês atual
     const inicioMes = new Date(currentYear, currentMonth, 1);
     const fimMes = new Date(currentYear, currentMonth + 1, 0);
-    
-    // Ajustar para comparar apenas datas (sem hora)
     inicioMes.setHours(0, 0, 0, 0);
     fimMes.setHours(23, 59, 59, 999);
     
@@ -240,67 +243,84 @@ function renderizarCalendarioGantt() {
         return;
     }
     
-    // Definir largura fixa por dia (em pixels)
-    const larguraPorDia = 120; // Aumentado para melhor visualização
+    const larguraColunaInfo = 220;
+    const containerCalendario = document.getElementById('calendarioGantt');
+    const larguraDisponivel = containerCalendario.clientWidth - larguraColunaInfo - 32;
+    const diasNoMes = getDiasNoMes(currentYear, currentMonth);  // ← ÚNICA declaração
     
-    // Gerar cabeçalho com dias do mês
-    const diasNoMes = getDiasNoMes(currentYear, currentMonth);
+    let larguraPorDia = Math.floor(larguraDisponivel / diasNoMes);
+    larguraPorDia = Math.min(90, Math.max(40, larguraPorDia));  // mínimo 40, máximo 90
     
-    let html = `<div class="gantt-container" style="min-width: ${(diasNoMes * larguraPorDia) + 250}px;">
-        <div class="gantt-header" style="display: flex; margin-left: 250px;">`;
+    // ... resto da função continua igual
     
+    let html = `<div class="gantt-container" style="min-width: ${(diasNoMes * larguraPorDia) + larguraColunaInfo}px;">
+        <div class="gantt-header" style="display: flex; margin-left: ${larguraColunaInfo}px;">`;
+    
+    // Cabeçalho dos dias
     for (let i = 0; i < diasNoMes; i++) {
         const data = new Date(currentYear, currentMonth, i + 1);
         const isWeekend = data.getDay() === 0 || data.getDay() === 6;
         const isToday = isDataHoje(data);
-        const diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][data.getDay()];
+        const diaSemana = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'][data.getDay()];
         
-        html += `<div class="gantt-dia" style="width: ${larguraPorDia}px; flex-shrink: 0; text-align: center; padding: 8px 4px; border-left: 1px solid #eee; ${isWeekend ? 'background-color: #f0f0f0;' : ''} ${isToday ? 'background-color: #ffe6b3; font-weight: bold;' : ''}">
-                    <div style="font-size: 11px;">${diaSemana}</div>
-                    <div><strong>${i + 1}</strong></div>
+        html += `<div class="gantt-dia ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}" style="width: ${larguraPorDia}px; flex-shrink: 0; text-align: center; padding: 6px 2px;">
+                    <div style="font-size: 10px;">${diaSemana}</div>
+                    <div><strong style="font-size: 11px;">${i + 1}</strong></div>
                 </div>`;
     }
     
     html += `</div><div class="gantt-linhas">`;
     
-    // Gerar linhas para cada tarefa
+    // Linhas de cada tarefa
     tarefasMes.forEach(tarefa => {
         const dataInicio = new Date(tarefa.data_inicio);
         const dataFim = new Date(tarefa.data_fim);
+        dataInicio.setHours(0, 0, 0, 0);
+        dataFim.setHours(23, 59, 59, 999);
         
-        // Calcular offset em dias desde o início do mês
+        // CÁLCULO CORRIGIDO DO OFFSET
         let inicioOffset = Math.floor((dataInicio - inicioMes) / (1000 * 60 * 60 * 24));
         
-        // Se a tarefa começa antes do mês atual, o offset é 0
+        // Se começa antes do mês, posiciona no primeiro dia
         if (inicioOffset < 0) {
             inicioOffset = 0;
         }
         
-        // Calcular duração em dias
-        const duracao = Math.floor((dataFim - dataInicio) / (1000 * 60 * 60 * 24)) + 1;
+        // CÁLCULO CORRIGIDO DOS DIAS VISÍVEIS
+        // Data final da tarefa, limitada ao último dia do mês
+        const fimReal = dataFim < fimMes ? dataFim : fimMes;
+        // Data inicial da tarefa, limitada ao primeiro dia do mês
+        const inicioReal = dataInicio > inicioMes ? dataInicio : inicioMes;
         
-        // Calcular quantos dias da tarefa estão dentro do mês
-        let diasVisiveis = duracao;
-        if (inicioOffset + duracao > diasNoMes) {
+        // Dias visíveis = diferença em dias + 1
+        let diasVisiveis = Math.floor((fimReal - inicioReal) / (1000 * 60 * 60 * 24)) + 1;
+        
+        // Segurança: não pode ultrapassar o mês
+        if (inicioOffset + diasVisiveis > diasNoMes) {
             diasVisiveis = diasNoMes - inicioOffset;
         }
+        if (diasVisiveis < 0) diasVisiveis = 0;
         
         const leftPos = inicioOffset * larguraPorDia;
         const largura = diasVisiveis * larguraPorDia;
-        
         const statusClass = getStatusClass(tarefa.status);
         
+        let nomeTarefa = escapeHtml(tarefa.nome);
+        if (nomeTarefa.length > 25) {
+            nomeTarefa = nomeTarefa.substring(0, 22) + '...';
+        }
+        
         html += `
-            <div class="gantt-linha" data-id="${tarefa.id}" style="display: flex; border-bottom: 1px solid #eee; cursor: pointer;" onclick="destacarTarefaNaLista(${tarefa.id})">
-                <div class="gantt-tarefa-info" style="width: 250px; padding: 8px; flex-shrink: 0; border-right: 1px solid #ddd;">
-                    <strong>${escapeHtml(tarefa.nome)}</strong><br>
-                    <small>${tarefa.responsavel} | ${formatDate(tarefa.data_inicio)}</small>
+            <div class="gantt-linha" data-id="${tarefa.id}" onclick="destacarTarefaNaLista(${tarefa.id})">
+                <div class="gantt-tarefa-info" style="width: ${larguraColunaInfo}px; padding: 8px 10px; flex-shrink: 0; border-right: 1px solid #ddd;">
+                    <strong style="font-size: 12px;">${nomeTarefa}</strong><br>
+                    <small style="font-size: 10px;">${tarefa.responsavel} | ${formatDate(tarefa.data_inicio)}</small>
                 </div>
-                <div class="gantt-barras" style="flex: 1; position: relative; min-height: 60px;">
+                <div class="gantt-barras">
                     <div class="gantt-barra ${statusClass}" 
-                         style="position: absolute; left: ${leftPos}px; width: ${Math.max(largura, 20)}px; height: 30px; border-radius: 4px; padding: 4px 8px; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; top: 15px;"
-                         onclick="event.stopPropagation(); destacarTarefaNaLista(${tarefa.id})">
-                        ${escapeHtml(tarefa.nome)}
+                         style="left: ${leftPos}px; width: ${Math.max(largura, 24)}px; height: 28px; font-size: 10px; padding: 4px 6px; top: 12px;"
+                         onclick="event.stopPropagation(); verDetalhes(${tarefa.id})">
+                        ${nomeTarefa}
                     </div>
                 </div>
             </div>
@@ -311,6 +331,7 @@ function renderizarCalendarioGantt() {
     $('#calendarioGantt').html(html);
     $('#mesAnoAtual').text(getNomeMes(currentMonth) + ' ' + currentYear);
 }
+
 function navegarMes(delta) {
     currentMonth += delta;
     if (currentMonth < 0) {

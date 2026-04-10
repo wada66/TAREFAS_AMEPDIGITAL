@@ -43,7 +43,7 @@
                             </td>
                             <td>
                                 {% if usuario.senha_alterada_em %}
-                                {{ usuario.senha_alterada_em[:19] }}
+                                {{ usuario.senha_alterada_em.strftime('%Y-%m-%d %H:%M:%S') if usuario.senha_alterada_em else 'Nunca' }}
                                 {% else %}
                                 -
                                 {% endif %}

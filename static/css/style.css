@@ -1,21 +1,34 @@
-/* Cores dos status */
-.status-atrasado { background-color: #dc3545 !important; color: white; }
-.status-concluido { background-color: #28a745 !important; color: white; }
-.status-em-andamento { background-color: #ffc107 !important; color: #000; }
-.status-nao-iniciado { background-color: #007bff !important; color: white; }
-.status-pausado { background-color: #6c757d !important; color: white; }
-.status-reuniao { background-color: #8b4513 !important; color: white; }
-.status-treinamento { background-color: #9b59b6 !important; color: white; }
+/* Estilo mais quadradinho - bordas leves de 4px */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
-/* Estilo do Gantt */
+h1, h2, h3, h4, h5, h6, .navbar-brand, #panelTarefas h5, .modal-title, #mesAnoAtual {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+}
+
+body, p, span, div, button, input, .tarefa-item, .gantt-tarefa-info, .badge, .btn {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+}
+
+/* Cores dos status */
+.status-atrasado { background: #dc3545 !important; color: white; }
+.status-concluido { background: #28a745 !important; color: white; }
+.status-em-andamento { background: #ffc107 !important; color: #000; }
+.status-nao-iniciado { background: #007bff !important; color: white; }
+.status-pausado { background: #6c757d !important; color: white; }
+.status-reuniao { background: #8b4513 !important; color: white; }
+.status-treinamento { background: #9b59b6 !important; color: white; }
+
+/* Gantt */
 .gantt-container {
     font-size: 12px;
 }
 
 .gantt-header {
     display: flex;
-    border-bottom: 2px solid #ddd;
-    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    background: #f8f9fa;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -27,37 +40,39 @@
     padding: 8px 4px;
     border-left: 1px solid #eee;
     font-weight: 500;
+    font-size: 12px;
 }
 
 .gantt-dia.weekend {
-    background-color: #f0f0f0;
+    background: #f5f5f5;
     color: #999;
 }
 
 .gantt-dia.today {
-    background-color: #ffe6b3;
+    background: #fff3cd;
     font-weight: bold;
+    color: #856404;
 }
 
 .gantt-linha {
     display: flex;
     border-bottom: 1px solid #eee;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background 0.15s;
 }
 
 .gantt-linha:hover {
-    background-color: #f8f9fa;
+    background: #fafbfc;
 }
 
 .gantt-linha.destacada {
-    background-color: #fff3cd;
+    background: #fff8e7;
     border-left: 3px solid #ffc107;
 }
 
 .gantt-tarefa-info {
-    width: 250px;
-    padding: 8px;
+    width: 260px;
+    padding: 10px 12px;
     flex-shrink: 0;
     border-right: 1px solid #ddd;
 }
@@ -65,67 +80,239 @@
 .gantt-barras {
     flex: 1;
     position: relative;
-    min-height: 50px;
+    min-height: 52px;
 }
 
 .gantt-barra {
     position: absolute;
     height: 30px;
     border-radius: 4px;
-    padding: 4px 8px;
+    padding: 5px 10px;
     font-size: 11px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     cursor: pointer;
-    transition: transform 0.2s;
-    top: 10px;
+    transition: all 0.15s;
+    top: 11px;
+    font-weight: 500;
 }
 
 .gantt-barra:hover {
-    transform: scaleY(1.1);
+    filter: brightness(0.95);
     z-index: 20;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-/* Lista de tarefas */
+/* Lista de tarefas - fundo cinza escuro, itens intercalados */
 .tarefa-item {
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.15s;
     border-left: 3px solid transparent;
+    border-radius: 4px !important;
+    margin-bottom: 4px !important;
+    padding: 10px 14px !important;
+}
+
+/* Cores intercaladas: branco e cinza clarinho */
+.tarefa-item:nth-child(even) {
+    background: #ffffff !important;
+}
+
+.tarefa-item:nth-child(odd) {
+    background: #f0f0f0 !important;
 }
 
 .tarefa-item:hover {
-    transform: translateX(5px);
-    background-color: #f8f9fa;
+    transform: translateX(2px);
+    filter: brightness(0.97);
 }
 
 .tarefa-item.destacada {
-    background-color: #fff3cd;
-    border-left-color: #ffc107;
+    border-left-color: #2aff7a !important;
+    border-left-width: 3px;
+    filter: brightness(0.98);
+}
+
+.tarefa-item h6 {
+    color: #222 !important;
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 13px;
+}
+
+.tarefa-item small {
+    color: #555 !important;
+    font-size: 11px;
 }
 
 .tarefa-acoes {
     visibility: hidden;
+    gap: 6px;
+    display: flex;
 }
 
 .tarefa-item:hover .tarefa-acoes {
     visibility: visible;
 }
 
+/* Botões sutis e pequenos na lista de tarefas */
+.tarefa-acoes {
+    visibility: hidden;
+    gap: 2px;
+    display: flex;
+    align-items: center;
+}
+
+.tarefa-item:hover .tarefa-acoes {
+    visibility: visible;
+}
+
+/* Botão Detalhes - pequeno e sutil */
+.btn-detalhes {
+    background: transparent !important;
+    color: #aaa !important;
+    border: none !important;
+    border-radius: 3px;
+    padding: 2px 6px !important;
+    font-size: 10px !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.2;
+}
+
+.btn-detalhes:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+    color: #1e5cc6 !important;
+}
+
+/* Botões Editar e Excluir - pequenos e sutis */
+.tarefa-acoes .btn {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 3px;
+    padding: 2px 6px !important;
+    color: #aaa !important;
+    font-size: 10px !important;
+    transition: all 0.2s ease;
+    line-height: 1.2;
+}
+
+.tarefa-acoes .btn:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+}
+
+.tarefa-acoes .btn:hover .fa-edit {
+    color: #2d7df6;
+}
+
+.tarefa-acoes .btn:hover .fa-trash {
+    color: #dc3545;
+}
+
+.tarefa-acoes i {
+    font-size: 10px;
+    margin-right: 2px;
+}
+
 /* Modo expandido */
-.expandido-lista #panelCalendario {
-    display: none;
+.expandido-lista #panelCalendario { display: none; }
+.expandido-lista #panelTarefas { width: 100%; }
+.expandido-calendario #panelTarefas { display: none; }
+.expandido-calendario #panelCalendario { width: 100%; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #e9ecef; }
+::-webkit-scrollbar-thumb { background: #1e5cc6; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2d7df6; }
+
+/* Badges */
+.badge { padding: 4px 10px; border-radius: 4px; font-weight: 500; font-size: 10px; }
+.btn { transition: all 0.15s ease !important; }
+
+/* Ajustes para o Gantt com dias menores */
+.gantt-tarefa-info {
+    font-size: 11px;
 }
 
-.expandido-lista #panelTarefas {
-    width: 100%;
+.gantt-barra {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.expandido-calendario #panelTarefas {
-    display: none;
+.gantt-dia div {
+    line-height: 1.3;
 }
 
-.expandido-calendario #panelCalendario {
-    width: 100%;
+/* Nova cor neon para bordas e detalhes */
+:root {
+    --neon-green: #7fff00;
+    --neon-green-dark: #6ee200;
+    --neon-green-bright: #aaff33;
 }
+
+#panelTarefas {
+    border-color: #7fff00 !important;
+    box-shadow: 0 0 4px rgba(127, 255, 0, 0.3);
+}
+
+#panelTarefas .fa-tasks {
+    color: #7fff00 !important;
+}
+
+#panelTarefas h5 i {
+    color: #7fff00;
+}
+
+#btnNovaTarefa {
+    background: #7fff00 !important;
+    color: #1a1a1a !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(127, 255, 0, 0.3);
+}
+
+#btnNovaTarefa:hover {
+    background: #6ee200 !important;
+    box-shadow: 0 4px 12px rgba(127, 255, 0, 0.4);
+}
+
+.tarefa-item.destacada {
+    border-left-color: #7fff00 !important;
+    box-shadow: inset 0 0 0 1px rgba(127, 255, 0, 0.2);
+}
+
+#btnNovaTarefa:hover {
+    text-shadow: 0 0 4px rgba(0,0,0,0.3);
+    filter: brightness(1.05);
+}
+
+#panelTarefas {
+    box-shadow: 0 0 8px rgba(127, 255, 0, 0.15);
+}
+
+/* Ajuste do nome da tarefa para não quebrar o layout */
+.tarefa-item h6 {
+    color: #222 !important;
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 180px;
+}
+
+/* Para telas menores, ajusta a largura máxima */
+@media (max-width: 1400px) {
+    .tarefa-item h6 {
+        max-width: 140px;
+    }
+}
+
+/* Tooltip para ver o nome completo ao passar o mouse */
+.tarefa-item h6[title] {
+    cursor: help;
+}
+

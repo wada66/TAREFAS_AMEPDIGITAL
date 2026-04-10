@@ -1,33 +1,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid vh-100 d-flex flex-column">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">📅 Agenda de Tarefas</a>
-            <div class="ms-auto">
-                <span class="text-white me-3">
-                    <i class="fas fa-user"></i> {{ user_name }} 
+<div class="container-fluid vh-100 d-flex flex-column p-0">
+    <!-- Navbar estilo quadrado -->
+    <nav style="background: #2563d9; padding: 10px 24px; width: 100%; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <!-- Logo -->
+            <div style="display: flex; align-items: center;">
+                <img src="{{ url_for('static', filename='images/AMEP-BRANCA-01.png') }}" alt="AMEP" style="height: 32px; width: auto;" onerror="this.style.display='none'; this.nextSibling.style.display='block';">
+                <span style="display: none; font-family: 'Segoe UI', Arial, sans-serif; font-weight: 700; color: #fff; font-size: 20px;">AMEP</span>
+            </div>
+            
+            <!-- Botões e ações -->
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="background: rgba(255,255,255,0.1); color: #fff; border-radius: 4px; padding: 6px 14px; display: inline-flex; align-items: center; gap: 8px; font-size: 13px;">
+                    <i class="fas fa-user-circle"></i> {{ user_name }} 
                     ({{ 'Admin' if user_type == 'admin' else 'Técnico' }})
                 </span>
-                <!-- Dentro do navbar, antes do Sair -->
-                <a href="{{ url_for('alterar_senha') }}" class="btn btn-outline-warning btn-sm me-2">
+                
+                <a href="{{ url_for('alterar_senha') }}" style="background: #333; color: #fff; border: none; border-radius: 4px; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: all 0.2s ease;" onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">
                     <i class="fas fa-key"></i> Alterar Senha
                 </a>
+                
                 {% if user_type == 'admin' %}
-                <a href="{{ url_for('admin_usuarios') }}" class="btn btn-outline-info btn-sm me-2">
+                <a href="{{ url_for('admin_usuarios') }}" style="background: #2d7df6; color: #fff; border: none; border-radius: 4px; padding: 6px 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: all 0.2s ease;" onmouseover="this.style.background='#3b8aff'" onmouseout="this.style.background='#2d7df6'">
                     <i class="fas fa-users-cog"></i> Gerenciar Usuários
                 </a>
                 {% endif %}
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                
+                <a href="{{ url_for('logout') }}" style="background: #222; color: #fff; border: none; border-radius: 4px; padding: 6px 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: all 0.2s ease;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#222'">
                     <i class="fas fa-sign-out-alt"></i> Sair
                 </a>
+                
                 {% if user_type == 'admin' %}
-                <button class="btn btn-success btn-sm ms-2" id="btnNovaTarefa">
+                <button id="btnNovaTarefa" style="background: #3bd16f; color: #000; border: none; border-radius: 4px; padding: 6px 18px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#2ea44f'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#3bd16f'; this.style.transform='translateY(0)'">
                     <i class="fas fa-plus"></i> Nova Tarefa
                 </button>
-                <a href="/export/csv" class="btn btn-info btn-sm ms-2">
+                <a href="/export/csv" style="background: #555; color: #fff; border: none; border-radius: 4px; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: all 0.2s ease;" onmouseover="this.style.background='#666'" onmouseout="this.style.background='#555'">
                     <i class="fas fa-download"></i> Exportar CSV
                 </a>
                 {% endif %}
@@ -35,54 +44,52 @@
         </div>
     </nav>
 
-    <!-- Layout principal com dois painéis -->
-    <div class="row flex-grow-1 m-0" id="mainLayout">
+    <!-- Divisória neon abaixo da topbar -->
+    <div style="height: 3px; background: #7fff00; width: 100%;"></div>
+
+    <!-- Layout principal -->
+    <div class="row flex-grow-1 m-0" id="mainLayout" style="background: #e0e5ec; display: flex; gap: 20px; padding: 20px; height: calc(100vh - 56px);">
         <!-- Painel esquerdo: Lista de tarefas -->
-        <div class="col-md-3 p-0 border-end" id="panelTarefas">
-            <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
-                <h5 class="mb-0"><i class="fas fa-tasks"></i> Lista de Tarefas</h5>
-                <button class="btn btn-sm btn-outline-secondary" id="expandirListaBtn">
-                    <i class="fas fa-expand-alt"></i> Expandir Lista
-                </button>
+        <div class="p-0" id="panelTarefas" style="width: 320px; background: #2a2a2a; border: 2px solid #2aff7a; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column;">
+            <div style="padding: 14px 16px; background: #252525; border-bottom: 1px solid #3a3a3a;">
+                <h5 style="color: #fff; margin: 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-tasks" style="color: #2aff7a;"></i> Lista de Tarefas
+                </h5>
             </div>
-            <!-- ADICIONAR ESTE BLOCO DE BUSCA AQUI -->
-            <div class="p-2 border-bottom">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="searchTarefaInput" placeholder="Buscar tarefa por nome...">
-                    <button class="btn btn-outline-primary" id="btnBuscarTarefa" type="button">
+            
+            <!-- Busca -->
+            <div style="padding: 12px 16px; background: #2a2a2a; flex-shrink: 0;">
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" class="form-control" id="searchTarefaInput" placeholder="Buscar tarefa..." style="border-radius: 4px; border: 1px solid #3a3a3a; background: #1a1a1a; color: #fff; padding: 8px 12px; font-size: 13px;">
+                    <button class="btn" id="btnBuscarTarefa" type="button" style="background: #1e5cc6; color: #fff; border-radius: 4px; padding: 6px 14px; border: none; font-size: 13px;">
                         <i class="fas fa-search"></i> Buscar
                     </button>
                 </div>
-                <button class="btn btn-sm btn-link text-muted mt-1" id="btnLimparBusca" style="display: none;">
+                <button class="btn btn-sm btn-link text-muted mt-2" id="btnLimparBusca" style="display: none; color: #888 !important; font-size: 12px; padding: 0;">
                     <i class="fas fa-times"></i> Limpar busca
                 </button>
             </div>
-            <div id="listaTarefas" class="p-2" style="height: calc(100vh - 120px); overflow-y: auto;">
-                <!-- Tarefas serão carregadas via JS -->
-                <div class="text-center text-muted mt-5">
+            
+            <div id="listaTarefas" style="padding: 0 16px 16px 16px; height: calc(100vh - 220px); overflow-y: auto;">
+                <div class="text-center text-muted mt-5" style="color: #888;">
                     <i class="fas fa-spinner fa-spin"></i> Carregando...
                 </div>
             </div>
         </div>
 
         <!-- Painel direito: Calendário Gantt -->
-        <div class="col-md-8 p-0" id="panelCalendario">
-            <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
+        <div class="p-0" id="panelCalendario" style="flex: 1; background: #fff; border: 2px solid #e0e4e8; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: #f8f9fa; border-bottom: 1px solid #e0e4e8;">
                 <div>
-                    <button class="btn btn-sm btn-outline-primary me-2" id="mesAnteriorBtn">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <span id="mesAnoAtual" class="h5 mb-0">Abril 2026</span>
-                    <button class="btn btn-sm btn-outline-primary ms-2" id="proximoMesBtn">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
+                    <button class="btn btn-sm" id="mesAnteriorBtn" style="background: #1e5cc6; color: #fff; border-radius: 4px; width: 32px; height: 32px; padding: 0;"><i class="fas fa-chevron-left"></i></button>
+                    <span id="mesAnoAtual" class="h5 mb-0 mx-3" style="font-weight: 600; color: #1a1a2e;">Abril 2026</span>
+                    <button class="btn btn-sm" id="proximoMesBtn" style="background: #1e5cc6; color: #fff; border-radius: 4px; width: 32px; height: 32px; padding: 0;"><i class="fas fa-chevron-right"></i></button>
                 </div>
-                <button class="btn btn-sm btn-outline-secondary" id="expandirCalendarioBtn">
-                    <i class="fas fa-expand-alt"></i> Expandir Calendário
+                <button class="btn btn-sm" id="expandirCalendarioBtn" style="background: #e9ecef; color: #495057; border-radius: 4px; padding: 4px 12px; font-size: 12px;">
+                    <i class="fas fa-expand-alt"></i> Expandir
                 </button>
             </div>
-            <div id="calendarioGantt" class="p-2" style="height: calc(100vh - 120px); overflow-y: auto; overflow-x: auto;">
-                <!-- Calendário será renderizado via JS -->
+            <div id="calendarioGantt" style="padding: 16px; flex: 1; overflow-y: auto; overflow-x: auto; background: #fff;">
                 <div class="text-center text-muted mt-5">
                     <i class="fas fa-spinner fa-spin"></i> Carregando calendário...
                 </div>
@@ -91,106 +98,95 @@
     </div>
 </div>
 
-<!-- Modal de Tarefa (Novo/Editar) - apenas para admin -->
+<!-- Modal de Tarefa -->
 {% if user_type == 'admin' %}
 <div class="modal fade" id="modalTarefa" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitulo">Nova Tarefa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 6px; border: none; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
+            <div class="modal-header" style="background: #1e5cc6; color: #fff; border-radius: 6px 6px 0 0; border: none; padding: 14px 20px;">
+                <h5 class="modal-title" id="modalTitulo" style="font-weight: 600; font-size: 16px;"><i class="fas fa-tasks me-2"></i>Nova Tarefa</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 20px;">
                 <form id="formTarefa">
                     <input type="hidden" id="tarefaId" value="">
-                    
-                    <div class="mb-3">
-                        <label for="nome" class="form-label">1. Nome da Tarefa: *</label>
-                        <input type="text" class="form-control" id="nome" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="descricao" class="form-label">2. Descrição Detalhada da Tarefa: *</label>
-                        <textarea class="form-control" id="descricao" rows="4" required></textarea>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="responsavel" class="form-label">3. Responsável pela Tarefa (Selecione o principal responsável): *</label>
-                        <select class="form-select" id="responsavel" required>
-                            <option value="AMEP">AMEP</option>
-                            <option value="IMAGEM">IMAGEM</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="participantes" class="form-label">4. Participantes: *</label>
-                        <textarea class="form-control" id="participantes" rows="2" placeholder="Nomes separados por vírgula" required></textarea>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="data_inicio" class="form-label">5. Data de Início Prevista: *</label>
-                        <input type="date" class="form-control" id="data_inicio" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="duracao" class="form-label">6. Duração Estimada (em dias úteis): *</label>
-                        <input type="number" class="form-control" id="duracao" min="1" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="prioridade" class="form-label">7. Prioridade da Tarefa: </label>
-                        <select class="form-select" id="prioridade">
-                            <option value="Alta">Alta (Crítica para o projeto)</option>
-                            <option value="Media">Média (Importante, mas pode ser adiada)</option>
-                            <option value="Baixa">Baixa (Melhoria ou tarefa de suporte)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="status" class="form-label">8. Status Atual da Tarefa: *</label>
-                        <select class="form-select" id="status" required>
-                            <option value="Atrasado">Atrasado</option>
-                            <option value="Concluido">Concluído</option>
-                            <option value="Em Andamento">Em Andamento</option>
-                            <option value="Nao Iniciado">Não Iniciado</option>
-                            <option value="Pausado">Pausado</option>
-                            <option value="Reuniao">Reunião</option>
-                            <option value="Treinamento">Treinamento</option>
-                        </select>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 13px;">Nome da Tarefa *</label>
+                            <input type="text" class="form-control" id="nome" style="border-radius: 4px; padding: 8px 12px; font-size: 14px;" required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 13px;">Descrição *</label>
+                            <textarea class="form-control" id="descricao" rows="4" style="border-radius: 4px; font-size: 14px;" required></textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 13px;">Responsável *</label>
+                            <select class="form-select" id="responsavel" style="border-radius: 4px; padding: 8px 12px;" required>
+                                <option value="AMEP">AMEP</option>
+                                <option value="IMAGEM">IMAGEM</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 13px;">Participantes *</label>
+                            <textarea class="form-control" id="participantes" rows="1" placeholder="Nomes separados por vírgula" style="border-radius: 4px; font-size: 14px;"></textarea>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 13px;">Data Início *</label>
+                            <input type="date" class="form-control" id="data_inicio" style="border-radius: 4px; padding: 8px 12px;" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 13px;">Duração (dias) *</label>
+                            <input type="number" class="form-control" id="duracao" min="1" style="border-radius: 4px; padding: 8px 12px;" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 13px;">Prioridade</label>
+                            <select class="form-select" id="prioridade" style="border-radius: 4px; padding: 8px 12px;">
+                                <option value="Alta">Alta</option>
+                                <option value="Media">Média</option>
+                                <option value="Baixa">Baixa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 13px;">Status *</label>
+                            <select class="form-select" id="status" style="border-radius: 4px; padding: 8px 12px;" required>
+                                <option value="Atrasado">Atrasado</option>
+                                <option value="Concluido">Concluído</option>
+                                <option value="Em Andamento">Em Andamento</option>
+                                <option value="Nao Iniciado">Não Iniciado</option>
+                                <option value="Pausado">Pausado</option>
+                                <option value="Reuniao">Reunião</option>
+                                <option value="Treinamento">Treinamento</option>
+                            </select>
+                        </div>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="salvarTarefaBtn">Salvar</button>
+            <div class="modal-footer" style="border-top: 1px solid #e0e4e8; padding: 12px 20px;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 4px; padding: 6px 16px; font-size: 13px;">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="salvarTarefaBtn" style="background: #3bd16f; color: #000; border: none; border-radius: 4px; padding: 6px 20px; font-weight: 600;">Salvar</button>
             </div>
         </div>
     </div>
 </div>
 {% endif %}
 
-<!-- Modal de Detalhes da Tarefa (para todos usuários) -->
+<!-- Modal de Detalhes -->
 <div class="modal fade" id="modalDetalhes" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Detalhes da Tarefa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 6px; border: none; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
+            <div class="modal-header" style="background: #2a2a2a; color: #fff; border-radius: 6px 6px 0 0; padding: 12px 20px;">
+                <h5 class="modal-title" style="font-size: 16px;"><i class="fas fa-info-circle me-2"></i>Detalhes da Tarefa</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div id="detalhesConteudo">
-                    <!-- Conteúdo carregado via JS -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <div class="modal-body" id="detalhesConteudo" style="padding: 20px;"></div>
+            <div class="modal-footer" style="border-top: 1px solid #e0e4e8; padding: 12px 20px;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 4px; padding: 6px 16px;">Fechar</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Passa o tipo de usuário para o JavaScript
     window.userType = '{{ user_type }}';
 </script>
 {% endblock %}
