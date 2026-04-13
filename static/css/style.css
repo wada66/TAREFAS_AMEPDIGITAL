@@ -314,3 +314,82 @@ body, p, span, div, button, input, .tarefa-item, .gantt-tarefa-info, .badge, .bt
 .tarefa-item h6[title] {
     cursor: help;
 }
+
+/* CARD PRINCIPAL */
+.custom-card {
+    background: #2f2f2f;
+    border: 3px solid #7fff00;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* HEADER */
+.custom-header {
+    background: #2a6ee8; /* azul mais vivo */
+    text-align: center;
+    padding: 15px;
+    font-weight: 500;
+}
+
+/* CORPO */
+.custom-card .card-body {
+    padding: 25px;
+}
+
+/* LABELS */
+.custom-card label {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+/* SELECT */
+.custom-card .form-select {
+    border-radius: 8px;
+    height: 42px;
+}
+
+/* INPUT SENHA */
+.custom-card .form-control {
+    border-radius: 8px;
+    height: 42px;
+}
+
+/* BOTÃO */
+.custom-btn {
+    background: #2a6ee8;
+    border: none;
+    border-radius: 25px;
+    height: 45px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.custom-btn:hover {
+    background: #3a7cff;
+}
+
+/* ALERTAS */
+.custom-card .alert {
+    border-radius: 8px;
+}
+
+.custom-header h3 {
+    font-size: 20px;       /* menor e mais equilibrado */
+    font-weight: 600;      /* menos pesado que bold */
+    margin: 0;
+    letter-spacing: 0.5px; /* leve sofisticação */
+}
+
+.custom-btn {
+    background: linear-gradient(90deg, #2a6ee8, #3a7cff);
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    height: 45px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.custom-header {
+    padding: 12px 20px; /* reduz altura */
+}

@@ -4,9 +4,9 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="text-center mb-0">Agenda de Tarefas</h3>
+            <div class="card shadow custom-card">
+                <div class="card-header custom-header text-white">
+                    <h3 class="text-center mb-0">CRONOGRAMA DE ATIVIDADES - AMEP DIGITAL</h3>
                 </div>
                 <div class="card-body">
                     {% if erro %}
@@ -18,9 +18,9 @@
                     
                     <form method="POST" id="loginForm">
                         <div class="mb-3">
-                            <label for="nome" class="form-label">Selecione seu nome:</label>
+                            <label for="nome" class="form-label">Login:</label>
                             <select class="form-select" name="nome" id="nome" required>
-                                <option value="">Escolha...</option>
+                                <option value="">Selecione o usuário...</option>
                                 {% for usuario in usuarios %}
                                 <option value="{{ usuario.nome }}" data-primeiro-acesso="{{ usuario.primeiro_acesso|default('true')|lower }}">
                                     {{ usuario.nome }}
@@ -43,7 +43,7 @@
                             </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary w-100" id="btnSubmit">
+                        <button type="submit" class="btn custom-btn w-100" id="btnSubmit">
                             Entrar
                         </button>
                     </form>

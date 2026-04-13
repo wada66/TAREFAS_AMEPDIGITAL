@@ -13,29 +13,31 @@
             
             <!-- Botões e ações -->
             <div style="display: flex; align-items: center; gap: 8px;">
+                
                 <span style="color: #fff; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; opacity: 0.85;">
                     <i class="fas fa-user-circle"></i> {{ user_name }} 
                     <span style="color: #fff; font-weight: 500;">({{ 'Admin' if user_type == 'admin' else 'Técnico' }})</span>
                 </span>
                 
-                <a href="{{ url_for('alterar_senha') }}" style="background: #333; color: #fff; border: none; border-radius: 4px; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: all 0.2s ease;" onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">
-                    <i class="fas fa-key"></i> Alterar Senha
-                </a>
-                
+                {% if user_type == 'admin' %}
+                <button id="btnNovaTarefa" style="background: #3bd16f; color: #000; border: none; border-radius: 4px; padding: 6px 18px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#2ea44f'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#3bd16f'; this.style.transform='translateY(0)'">
+                    <i class="fas fa-plus"></i> Nova Tarefa
+                </button>
+
                 {% if user_type == 'admin' %}
                 <a href="{{ url_for('admin_usuarios') }}" style="background: #2d7df6; color: #fff; border: none; border-radius: 4px; padding: 6px 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: all 0.2s ease;" onmouseover="this.style.background='#3b8aff'" onmouseout="this.style.background='#2d7df6'">
                     <i class="fas fa-users-cog"></i> Gerenciar Usuários
                 </a>
                 {% endif %}
+
+                <a href="{{ url_for('alterar_senha') }}" style="background: #333; color: #fff; border: none; border-radius: 4px; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: all 0.2s ease;" onmouseover="this.style.background='#444'" onmouseout="this.style.background='#333'">
+                    <i class="fas fa-key"></i> Alterar Senha
+                </a>
                 
                 <a href="{{ url_for('logout') }}" style="background: #222; color: #fff; border: none; border-radius: 4px; padding: 6px 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: all 0.2s ease;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#222'">
                     <i class="fas fa-sign-out-alt"></i> Sair
                 </a>
                 
-                {% if user_type == 'admin' %}
-                <button id="btnNovaTarefa" style="background: #3bd16f; color: #000; border: none; border-radius: 4px; padding: 6px 18px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#2ea44f'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#3bd16f'; this.style.transform='translateY(0)'">
-                    <i class="fas fa-plus"></i> Nova Tarefa
-                </button>
                 <a href="/export/csv" style="background: #555; color: #fff; border: none; border-radius: 4px; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: all 0.2s ease;" onmouseover="this.style.background='#666'" onmouseout="this.style.background='#555'">
                     <i class="fas fa-download"></i> Exportar CSV
                 </a>
@@ -85,9 +87,7 @@
                     <span id="mesAnoAtual" class="h5 mb-0 mx-3" style="font-weight: 600; color: #1a1a2e;">Abril 2026</span>
                     <button class="btn btn-sm" id="proximoMesBtn" style="background: #1e5cc6; color: #fff; border-radius: 4px; width: 32px; height: 32px; padding: 0;"><i class="fas fa-chevron-right"></i></button>
                 </div>
-                <button class="btn btn-sm" id="expandirCalendarioBtn" style="background: #e9ecef; color: #495057; border-radius: 4px; padding: 4px 12px; font-size: 12px;">
-                    <i class="fas fa-expand-alt"></i> Expandir
-                </button>
+
             </div>
             <div id="calendarioGantt" style="padding: 16px; flex: 1; overflow-y: auto; overflow-x: auto; background: #fff;">
                 <div class="text-center text-muted mt-5">
@@ -131,7 +131,7 @@
                             <textarea class="form-control" id="participantes" rows="1" placeholder="Nomes separados por vírgula" style="border-radius: 4px; font-size: 14px;"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">9. Equipes Envolvidas:</label>
+                            <label class="form-label">Equipes Envolvidas:</label>
                             <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 8px;">
                                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
                                     <input type="checkbox" class="equipe-checkbox" value="ADMIN"> ADMIN
