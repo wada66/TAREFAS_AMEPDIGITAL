@@ -327,7 +327,7 @@ function renderizarCalendarioGantt() {
                 <div class="gantt-barras">
                     <div class="gantt-barra ${statusClass}" 
                          style="left: ${leftPos}px; width: ${Math.max(largura, 24)}px; height: 28px; font-size: 10px; padding: 4px 6px; top: 12px;"
-                         onclick="event.stopPropagation(); verDetalhes(${tarefa.id})">
+                         onclick="event.stopPropagation(); destacarTarefaNaLista(${tarefa.id})">
                         ${nomeTarefa}
                     </div>
                 </div>
@@ -353,29 +353,53 @@ function navegarMes(delta) {
 }
 
 function destacarTarefaNaLista(tarefaId) {
-    // Remover destaque anterior
+    // REMOVER todos os destaques anteriores (lista e Gantt)
     $('.tarefa-item').removeClass('destacada');
+    $('.gantt-linha').removeClass('destacada');
+    $('.gantt-barra').removeClass('destacada');
+    
+    // Adicionar novo destaque na lista
     $(`.tarefa-item[data-id="${tarefaId}"]`).addClass('destacada');
     
-    // Rolar até a tarefa
+    // Adicionar novo destaque no Gantt (linha e barra)
+    $(`.gantt-linha[data-id="${tarefaId}"]`).addClass('destacada');
+    $(`.gantt-linha[data-id="${tarefaId}"] .gantt-barra`).addClass('destacada');
+    
+    // Rolar até a tarefa na lista
     const element = $(`.tarefa-item[data-id="${tarefaId}"]`);
     if (element.length) {
         $('#listaTarefas').animate({
             scrollTop: element.offset().top - $('#listaTarefas').offset().top + $('#listaTarefas').scrollTop()
         }, 300);
     }
+    
+    // Rolar até a linha no Gantt
+    const ganttElement = $(`.gantt-linha[data-id="${tarefaId}"]`);
+    if (ganttElement.length) {
+        $('#calendarioGantt').animate({
+            scrollTop: ganttElement.offset().top - $('#calendarioGantt').offset().top + $('#calendarioGantt').scrollTop() - 100
+        }, 300);
+    }
 }
 
 function destacarTarefaNoGantt(tarefaId) {
-    // Remover destaque anterior
+    // REMOVER todos os destaques anteriores (lista e Gantt)
+    $('.tarefa-item').removeClass('destacada');
     $('.gantt-linha').removeClass('destacada');
-    $(`.gantt-linha[data-id="${tarefaId}"]`).addClass('destacada');
+    $('.gantt-barra').removeClass('destacada');
     
-    // Rolar até a linha do Gantt
+    // Adicionar novo destaque na lista
+    $(`.tarefa-item[data-id="${tarefaId}"]`).addClass('destacada');
+    
+    // Adicionar novo destaque no Gantt (linha e barra)
+    $(`.gantt-linha[data-id="${tarefaId}"]`).addClass('destacada');
+    $(`.gantt-linha[data-id="${tarefaId}"] .gantt-barra`).addClass('destacada');
+    
+    // Rolar até a linha no Gantt
     const element = $(`.gantt-linha[data-id="${tarefaId}"]`);
     if (element.length) {
         $('#calendarioGantt').animate({
-            scrollTop: element.offset().top - $('#calendarioGantt').offset().top + $('#calendarioGantt').scrollTop()
+            scrollTop: element.offset().top - $('#calendarioGantt').offset().top + $('#calendarioGantt').scrollTop() - 100
         }, 300);
     }
 }
