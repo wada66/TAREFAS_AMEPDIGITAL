@@ -55,7 +55,12 @@ $(document).ready(function() {
     // Botões de expandir
     $('#expandirListaBtn').click(() => toggleExpandir('lista'));
     $('#expandirCalendarioBtn').click(() => toggleExpandir('calendario'));
-});
+    });
+
+    // Evento para quando os checkboxes mudarem
+    $(document).on('change', '.equipe-checkbox', function() {
+        atualizarEquipesSelecionadas();
+    });
 
 function carregarTarefas() {
     $.get('/api/tarefas', function(data) {
@@ -97,25 +102,24 @@ function renderizarListaTarefas() {
                         <h6 style="margin: 0 0 4px 0;" title="${escapeHtml(tarefa.nome)}">${nomeExibido}</h6>
                         <small class="text-muted">
                             <i class="fas fa-user"></i> ${tarefa.responsavel} |
+                            ${tarefa.equipes_envolvidas ? `<i class="fas fa-building"></i> ${escapeHtml(tarefa.equipes_envolvidas)} |` : ''}
                             <i class="fas fa-calendar"></i> ${formatDate(tarefa.data_inicio)} a ${formatDate(tarefa.data_fim)} |
                             <span class="badge ${statusClass}">${tarefa.status}</span>
                         </small>
                     </div>
-                    ${window.userType === 'admin' ? `
-                        <div class="tarefa-acoes">
-                            <button class="btn-detalhes" onclick="event.stopPropagation(); verDetalhes(${tarefa.id})" title="Ver detalhes">
-                                <i class="fas fa-info-circle"></i>
+                    <div class="tarefa-acoes">
+                        <button class="btn-detalhes" onclick="event.stopPropagation(); verDetalhes(${tarefa.id})" title="Ver detalhes">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                        ${window.userType === 'admin' ? `
+                            <button class="btn" onclick="event.stopPropagation(); editarTarefa(${tarefa.id})" title="Editar">
+                                <i class="fas fa-edit"></i>
                             </button>
-                            ${window.userType === 'admin' ? `
-                                <button class="btn" onclick="event.stopPropagation(); editarTarefa(${tarefa.id})" title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn" onclick="event.stopPropagation(); excluirTarefa(${tarefa.id})" title="Excluir">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            ` : ''}
-                        </div>
-                    ` : ''}
+                            <button class="btn" onclick="event.stopPropagation(); excluirTarefa(${tarefa.id})" title="Excluir">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
         `;
@@ -154,6 +158,10 @@ function verDetalhes(tarefaId) {
         <div class="mb-3">
             <strong><i class="fas fa-chart-line"></i> Status:</strong><br>
             <p class="mt-1"><span class="badge ${getStatusClass(tarefa.status)}">${tarefa.status}</span></p>
+        </div>
+        <div class="mb-3">
+            <strong><i class="fas fa-building"></i> Equipes Envolvidas:</strong><br>
+            <p class="mt-1">${escapeHtml(tarefa.equipes_envolvidas || 'Nenhuma equipe informada')}</p>
         </div>
     `;
     
@@ -382,6 +390,7 @@ function abrirModalTarefa(tarefaId = null) {
             $('#link_externo').val(tarefa.link_externo || '');
             $('#responsavel').val(tarefa.responsavel);
             $('#participantes').val(tarefa.participantes || '');
+            carregarEquipesNoFormulario(tarefa.equipes_envolvidas || '');
             $('#data_inicio').val(tarefa.data_inicio);
             $('#duracao').val(tarefa.duracao_dias_uteis);
             $('#prioridade').val(tarefa.prioridade);
@@ -392,6 +401,9 @@ function abrirModalTarefa(tarefaId = null) {
         $('#modalTitulo').text('Nova Tarefa');
         $('#formTarefa')[0].reset();
         $('#tarefaId').val('');
+        // Limpar checkboxes ao criar nova tarefa
+        $('.equipe-checkbox').prop('checked', false);
+        $('#equipes_envolvidas').val('');
         $('#modalTarefa').modal('show');
     }
 }
@@ -408,6 +420,7 @@ function salvarTarefa() {
         link_externo: $('#link_externo').val(),
         responsavel: $('#responsavel').val(),
         participantes: $('#participantes').val(),
+        equipes_envolvidas: $('#equipes_envolvidas').val(),  // ← NOVO
         data_inicio: $('#data_inicio').val(),
         duracao_dias_uteis: $('#duracao').val(),
         prioridade: $('#prioridade').val(),
@@ -520,4 +533,29 @@ function escapeHtml(text) {
 }
 function escapeRegex(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Atualizar o campo hidden com as equipes selecionadas
+function atualizarEquipesSelecionadas() {
+    const selecionadas = [];
+    $('.equipe-checkbox:checked').each(function() {
+        selecionadas.push($(this).val());
+    });
+    $('#equipes_envolvidas').val(selecionadas.join(', '));
+}
+
+// Carregar as equipes selecionadas no formulário
+function carregarEquipesNoFormulario(equipesString) {
+    // Limpar todos os checkboxes
+    $('.equipe-checkbox').prop('checked', false);
+    
+    if (equipesString) {
+        const equipesArray = equipesString.split(',').map(e => e.trim());
+        $('.equipe-checkbox').each(function() {
+            if (equipesArray.includes($(this).val())) {
+                $(this).prop('checked', true);
+            }
+        });
+    }
+    atualizarEquipesSelecionadas();
 }

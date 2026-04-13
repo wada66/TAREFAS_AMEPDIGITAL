@@ -45,7 +45,7 @@ def get_all_tarefas():
     conn = get_db_connection()
     try:
         result = conn.run("""
-            SELECT id, nome, descricao, link_externo, responsavel, participantes,
+            SELECT id, nome, descricao, link_externo, responsavel, participantes, equipes_envolvidas,
                    data_inicio, duracao_dias_uteis, data_fim, prioridade, status
             FROM tarefas
             ORDER BY 
@@ -63,8 +63,9 @@ def get_all_tarefas():
     """)
         return [{
             'id': row[0], 'nome': row[1], 'descricao': row[2], 'link_externo': row[3],
-            'responsavel': row[4], 'participantes': row[5], 'data_inicio': row[6],
-            'duracao_dias_uteis': row[7], 'data_fim': row[8], 'prioridade': row[9], 'status': row[10]
+            'responsavel': row[4], 'participantes': row[5], 'equipes_envolvidas': row[6],
+            'data_inicio': row[7], 'duracao_dias_uteis': row[8], 'data_fim': row[9], 
+            'prioridade': row[10], 'status': row[11]
         } for row in result]
     finally:
         conn.close()
@@ -77,9 +78,9 @@ def get_tarefa_by_id(tarefa_id):
             row = result[0]
             return {
                 'id': row[0], 'nome': row[1], 'descricao': row[2], 'link_externo': row[3],
-                'responsavel': row[4], 'participantes': row[5], 'data_inicio': row[6],
-                'duracao_dias_uteis': row[7], 'data_fim': row[8], 'prioridade': row[9],
-                'status': row[10], 'criado_em': row[11], 'atualizado_em': row[12]
+                'responsavel': row[4], 'participantes': row[5], 'equipes_envolvidas': row[6],
+                'data_inicio': row[7], 'duracao_dias_uteis': row[8], 'data_fim': row[9], 
+                'prioridade': row[10], 'status': row[11], 'criado_em': row[12], 'atualizado_em': row[13]
             }
         return None
     finally:
@@ -92,9 +93,9 @@ def create_tarefa(data):
         data_fim = calcular_data_fim(data['data_inicio'], int(data['duracao_dias_uteis']))
         
         result = conn.run("""
-            INSERT INTO tarefas (nome, descricao, link_externo, responsavel, participantes,
+            INSERT INTO tarefas (nome, descricao, link_externo, responsavel, participantes, equipes_envolvidas,
                                  data_inicio, duracao_dias_uteis, data_fim, prioridade, status)
-            VALUES (:nome, :descricao, :link_externo, :responsavel, :participantes,
+            VALUES (:nome, :descricao, :link_externo, :responsavel, :participantes, :equipes_envolvidas,
                     :data_inicio, :duracao_dias_uteis, :data_fim, :prioridade, :status)
             RETURNING id
         """,
@@ -103,6 +104,7 @@ def create_tarefa(data):
         link_externo=data.get('link_externo', ''),
         responsavel=data['responsavel'],
         participantes=data.get('participantes', ''),
+        equipes_envolvidas=data.get('equipes_envolvidas', ''),  # ← NOVO
         data_inicio=data['data_inicio'],
         duracao_dias_uteis=int(data['duracao_dias_uteis']),
         data_fim=data_fim,
@@ -122,7 +124,7 @@ def update_tarefa(tarefa_id, data):
         conn.run("""
             UPDATE tarefas
             SET nome = :nome, descricao = :descricao, link_externo = :link_externo,
-                responsavel = :responsavel, participantes = :participantes,
+                responsavel = :responsavel, participantes = :participantes, equipes_envolvidas = :equipes_envolvidas,
                 data_inicio = :data_inicio, duracao_dias_uteis = :duracao_dias_uteis,
                 data_fim = :data_fim, prioridade = :prioridade, status = :status,
                 atualizado_em = CURRENT_TIMESTAMP
@@ -134,6 +136,7 @@ def update_tarefa(tarefa_id, data):
         link_externo=data.get('link_externo', ''),
         responsavel=data['responsavel'],
         participantes=data.get('participantes', ''),
+        equipes_envolvidas=data.get('equipes_envolvidas', ''),  # ← NOVO
         data_inicio=data['data_inicio'],
         duracao_dias_uteis=int(data['duracao_dias_uteis']),
         data_fim=data_fim,
@@ -154,15 +157,16 @@ def get_tarefas_export_csv():
     conn = get_db_connection()
     try:
         result = conn.run("""
-            SELECT nome, descricao, responsavel, participantes, 
+            SELECT nome, descricao, responsavel, participantes, equipes_envolvidas,
                    data_inicio, data_fim, duracao_dias_uteis, prioridade, status
             FROM tarefas
             ORDER BY data_inicio
         """)
         return [{
             'nome': row[0], 'descricao': row[1], 'responsavel': row[2],
-            'participantes': row[3], 'data_inicio': row[4], 'data_fim': row[5],
-            'duracao_dias_uteis': row[6], 'prioridade': row[7], 'status': row[8]
+            'participantes': row[3], 'equipes_envolvidas': row[4],
+            'data_inicio': row[5], 'data_fim': row[6],
+            'duracao_dias_uteis': row[7], 'prioridade': row[8], 'status': row[9]
         } for row in result]
     finally:
         conn.close()

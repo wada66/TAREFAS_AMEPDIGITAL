@@ -248,6 +248,7 @@ def export_csv():
             t['descricao'],
             t['responsavel'],
             t['participantes'],
+            t['equipes'],
             t['data_inicio'],
             t['data_fim'],
             t['duracao_dias_uteis'],
