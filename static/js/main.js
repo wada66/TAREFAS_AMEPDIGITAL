@@ -62,6 +62,23 @@ $(document).ready(function() {
         atualizarEquipesSelecionadas();
     });
 
+    // Clicar fora (no fundo) limpa a seleção
+    $(document).on('click', function(event) {
+        // Verifica se o clique NÃO foi em uma tarefa, nem na barra do Gantt
+        const isTarefa = $(event.target).closest('.tarefa-item').length > 0;
+        const isGanttBarra = $(event.target).closest('.gantt-barra').length > 0;
+        const isGanttLinha = $(event.target).closest('.gantt-linha').length > 0;
+        
+        if (!isTarefa && !isGanttBarra && !isGanttLinha) {
+            limparDestaque();
+        }
+    });
+
+    // Evitar que o clique no modal propague para o documento
+    $(document).on('click', '.modal, .modal *', function(event) {
+        event.stopPropagation();
+    });
+
 function carregarTarefas() {
     $.get('/api/tarefas', function(data) {
         tarefas = data;
@@ -353,15 +370,20 @@ function navegarMes(delta) {
 }
 
 function destacarTarefaNaLista(tarefaId) {
-    // REMOVER todos os destaques anteriores (lista e Gantt)
+    // Se a tarefa já está destacada, apenas limpa o destaque (toggle)
+    if ($(`.tarefa-item[data-id="${tarefaId}"]`).hasClass('destacada')) {
+        limparDestaque();
+        return;
+    }
+    
+    // Caso contrário, remove todos e destaca a nova
+    limparDestaque();
+    
     $('.tarefa-item').removeClass('destacada');
     $('.gantt-linha').removeClass('destacada');
     $('.gantt-barra').removeClass('destacada');
     
-    // Adicionar novo destaque na lista
     $(`.tarefa-item[data-id="${tarefaId}"]`).addClass('destacada');
-    
-    // Adicionar novo destaque no Gantt (linha e barra)
     $(`.gantt-linha[data-id="${tarefaId}"]`).addClass('destacada');
     $(`.gantt-linha[data-id="${tarefaId}"] .gantt-barra`).addClass('destacada');
     
@@ -383,15 +405,16 @@ function destacarTarefaNaLista(tarefaId) {
 }
 
 function destacarTarefaNoGantt(tarefaId) {
-    // REMOVER todos os destaques anteriores (lista e Gantt)
-    $('.tarefa-item').removeClass('destacada');
-    $('.gantt-linha').removeClass('destacada');
-    $('.gantt-barra').removeClass('destacada');
+    // Se a tarefa já está destacada, apenas limpa o destaque (toggle)
+    if ($(`.gantt-linha[data-id="${tarefaId}"]`).hasClass('destacada')) {
+        limparDestaque();
+        return;
+    }
     
-    // Adicionar novo destaque na lista
+    // Caso contrário, remove todos e destaca a nova
+    limparDestaque();
+    
     $(`.tarefa-item[data-id="${tarefaId}"]`).addClass('destacada');
-    
-    // Adicionar novo destaque no Gantt (linha e barra)
     $(`.gantt-linha[data-id="${tarefaId}"]`).addClass('destacada');
     $(`.gantt-linha[data-id="${tarefaId}"] .gantt-barra`).addClass('destacada');
     
@@ -582,4 +605,10 @@ function carregarEquipesNoFormulario(equipesString) {
         });
     }
     atualizarEquipesSelecionadas();
+}
+
+function limparDestaque() {
+    $('.tarefa-item').removeClass('destacada');
+    $('.gantt-linha').removeClass('destacada');
+    $('.gantt-barra').removeClass('destacada');
 }
