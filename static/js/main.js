@@ -4,6 +4,13 @@ let currentMonth = currentDate.getMonth();
 let currentYear = currentDate.getFullYear();
 let searchTerm = '';  // <-- ADICIONAR ESTA LINHA
 
+// Função para converter string de data sem fuso horário
+function parseDateLocal(dateString) {
+    if (!dateString) return null;
+    const [ano, mes, dia] = dateString.split('-');
+    return new Date(ano, mes - 1, dia);
+}
+
 // Filtrar tarefas por nome
 function filtrarTarefasPorNome() {
     if (!searchTerm) return tarefas;
@@ -256,10 +263,8 @@ function renderizarCalendarioGantt() {
     fimMes.setHours(23, 59, 59, 999);
     
     const tarefasMes = tarefas.filter(t => {
-        const dataInicio = new Date(t.data_inicio);
-        const dataFim = new Date(t.data_fim);
-        dataInicio.setHours(0, 0, 0, 0);
-        dataFim.setHours(23, 59, 59, 999);
+        const dataInicio = parseDateLocal(t.data_inicio);
+        const dataFim = parseDateLocal(t.data_fim);
         return (dataInicio <= fimMes && dataFim >= inicioMes);
     });
     
@@ -298,8 +303,8 @@ function renderizarCalendarioGantt() {
     
     // Linhas de cada tarefa
     tarefasMes.forEach(tarefa => {
-        const dataInicio = new Date(tarefa.data_inicio);
-        const dataFim = new Date(tarefa.data_fim);
+        const dataInicio = parseDateLocal(tarefa.data_inicio);
+        const dataFim = parseDateLocal(tarefa.data_fim);
         dataInicio.setHours(0, 0, 0, 0);
         dataFim.setHours(23, 59, 59, 999);
         
@@ -456,7 +461,33 @@ function abrirModalTarefa(tarefaId = null) {
 }
 
 function editarTarefa(tarefaId) {
-    abrirModalTarefa(tarefaId);
+    console.log('Editando tarefa via array local:', tarefaId);
+    
+    // Buscar a tarefa no array local (já carregado)
+    const tarefa = tarefas.find(t => t.id === tarefaId);
+    
+    if (!tarefa) {
+        console.error('Tarefa não encontrada no array local');
+        alert('Erro: Tarefa não encontrada!');
+        return;
+    }
+    
+    // Preencher o formulário com os dados do array local
+    $('#modalTitulo').text('Editar Tarefa');
+    $('#tarefaId').val(tarefa.id);
+    $('#nome').val(tarefa.nome);
+    $('#descricao').val(tarefa.descricao || '');
+    $('#link_externo').val(tarefa.link_externo || '');
+    $('#responsavel').val(tarefa.responsavel);
+    $('#participantes').val(tarefa.participantes || '');
+    carregarEquipesNoFormulario(tarefa.equipes_envolvidas || '');
+    $('#data_inicio').val(tarefa.data_inicio);
+    $('#duracao').val(tarefa.duracao_dias_uteis);
+    $('#prioridade').val(tarefa.prioridade);
+    $('#status').val(tarefa.status);
+    
+    // Abrir o modal
+    $('#modalTarefa').modal('show');
 }
 
 function salvarTarefa() {
@@ -558,8 +589,9 @@ function getNomeMes(mes) {
 
 function formatDate(dateString) {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
+    // Parse manual para evitar problemas de fuso horário
+    const [ano, mes, dia] = dateString.split('-');
+    return `${dia}/${mes}/${ano}`;
 }
 
 function isDataHoje(data) {
