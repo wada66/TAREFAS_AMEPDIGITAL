@@ -324,6 +324,8 @@ function renderizarCalendarioGantt() {
         
         // CÁLCULO CORRIGIDO DO OFFSET
         let inicioOffset = Math.floor((dataInicio - inicioMes) / (1000 * 60 * 60 * 24));
+        if (inicioOffset < 0) inicioOffset = 0;
+        inicioOffset = Math.floor(inicioOffset);  // ← GARANTE INTEIRO
         
         // Se começa antes do mês, posiciona no primeiro dia
         if (inicioOffset < 0) {
@@ -345,7 +347,7 @@ function renderizarCalendarioGantt() {
         }
         if (diasVisiveis < 0) diasVisiveis = 0;
         
-        const leftPos = inicioOffset * larguraPorDia;
+        const leftPos = Math.round(inicioOffset * larguraPorDia);
         const largura = diasVisiveis * larguraPorDia;
         const statusClass = getStatusClass(tarefa.status);
         
