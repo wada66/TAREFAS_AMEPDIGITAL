@@ -4,6 +4,14 @@ let currentMonth = currentDate.getMonth();
 let currentYear = currentDate.getFullYear();
 let searchTerm = '';  // <-- ADICIONAR ESTA LINHA
 
+function escapeHtmlComQuebra(text) {
+    if (!text) return '';
+    // Primeiro escapa o HTML
+    let escaped = escapeHtml(text);
+    // Depois converte quebras de linha em <br>
+    return escaped.replace(/\n/g, '<br>');
+}
+
 // Função para converter string de data sem fuso horário
 function parseDateLocal(dateString) {
     if (!dateString) return null;
@@ -163,9 +171,8 @@ function verDetalhes(tarefaId) {
             <strong><i class="fas fa-tag"></i> Nome da Tarefa:</strong><br>
             <p class="mt-1">${escapeHtml(tarefa.nome)}</p>
         </div>
-        <div class="mb-3">
-            <strong><i class="fas fa-align-left"></i> Descrição:</strong><br>
-            <p class="mt-1">${escapeHtml(tarefa.descricao || 'Sem descrição')}</p>
+        <div><strong>Descrição:</strong><br>
+            <p style="margin-top: 4px;">${escapeHtmlComQuebra(tarefa.descricao || 'Sem descrição')}</p>
         </div>
         <div class="mb-3">
             <strong><i class="fas fa-user-check"></i> Responsável (Principal):</strong><br>

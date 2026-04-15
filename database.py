@@ -177,13 +177,19 @@ def calcular_data_fim(data_inicio_str, dias_uteis):
     """Calcula a data fim considerando apenas dias úteis (segunda a sexta)"""
     data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d')
     data_atual = data_inicio
-    dias_contados = 0
+    dias_contados = 1  # ← COMEÇA EM 1 (já conta o dia atual)
+    
+    # Se duração for 1, retorna a própria data de início
+    if dias_uteis <= 1:
+        return data_inicio.strftime('%Y-%m-%d')
     
     while dias_contados < dias_uteis:
         data_atual += timedelta(days=1)
         # 0 = segunda, 1 = terça, ..., 5 = sábado, 6 = domingo
         if data_atual.weekday() < 5:  # 0-4 = dias úteis
             dias_contados += 1
+    
+    return data_atual.strftime('%Y-%m-%d')
     
     return data_atual.strftime('%Y-%m-%d')
 
