@@ -187,6 +187,13 @@ function verDetalhes(tarefaId) {
             <strong><i class="fas fa-building"></i> Equipes Envolvidas:</strong><br>
             <p class="mt-1">${escapeHtml(tarefa.equipes_envolvidas || 'Nenhuma equipe informada')}</p>
         </div>
+        <div><i class="fas fa-tag"></i> Tipo da Tarefa:</strong><br>
+            <p style="margin-top: 4px;">
+                <span class="badge ${tarefa.tipo_tarefa === 'Reuniao' ? 'status-reuniao' : (tarefa.tipo_tarefa === 'Treinamento' ? 'status-treinamento' : 'status-nao-iniciado')}" style="padding: 6px 12px;">
+                    ${tarefa.tipo_tarefa || 'Normal'}
+                </span>
+            </p>
+        </div>
     `;
     
     $('#detalhesConteudo').html(html);
@@ -446,6 +453,7 @@ function abrirModalTarefa(tarefaId = null) {
             $('#data_inicio').val(tarefa.data_inicio);
             $('#duracao').val(tarefa.duracao_dias_uteis);
             $('#prioridade').val(tarefa.prioridade);
+            $('#tipo_tarefa').val(tarefa.tipo_tarefa || 'Normal');
             $('#status').val(tarefa.status);
             $('#modalTarefa').modal('show');
         });
@@ -502,6 +510,7 @@ function salvarTarefa() {
         data_inicio: $('#data_inicio').val(),
         duracao_dias_uteis: $('#duracao').val(),
         prioridade: $('#prioridade').val(),
+        tipo_tarefa: $('#tipo_tarefa').val(),
         status: $('#status').val()
     };
     

@@ -424,3 +424,8 @@ body, p, span, div, button, input, .tarefa-item, .gantt-tarefa-info, .badge, .bt
 .gantt-barra {
     transition: all 0.2s ease;
 }
+
+/* Cores para tipos de tarefa */
+.tipo-normal { background-color: #6c757d !important; color: white; }
+.tipo-reuniao { background-color: #9b59b6 !important; color: white; }
+.tipo-treinamento { background-color: #e67e22 !important; color: white; }

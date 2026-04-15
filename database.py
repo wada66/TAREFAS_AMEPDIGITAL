@@ -46,7 +46,7 @@ def get_all_tarefas():
     try:
         result = conn.run("""
             SELECT id, nome, descricao, link_externo, responsavel, participantes, equipes_envolvidas,
-                   data_inicio, duracao_dias_uteis, data_fim, prioridade, status
+                   data_inicio, duracao_dias_uteis, data_fim, prioridade, status, tipo
             FROM tarefas
             ORDER BY 
                 CASE status
@@ -65,7 +65,7 @@ def get_all_tarefas():
             'id': row[0], 'nome': row[1], 'descricao': row[2], 'link_externo': row[3],
             'responsavel': row[4], 'participantes': row[5], 'equipes_envolvidas': row[6],
             'data_inicio': row[7], 'duracao_dias_uteis': row[8], 'data_fim': row[9], 
-            'prioridade': row[10], 'status': row[11]
+            'prioridade': row[10], 'status': row[11], 'tipo_tarefa': row[12]
         } for row in result]
     finally:
         conn.close()
@@ -80,7 +80,7 @@ def get_tarefa_by_id(tarefa_id):
                 'id': row[0], 'nome': row[1], 'descricao': row[2], 'link_externo': row[3],
                 'responsavel': row[4], 'participantes': row[5], 'equipes_envolvidas': row[6],
                 'data_inicio': row[7], 'duracao_dias_uteis': row[8], 'data_fim': row[9], 
-                'prioridade': row[10], 'status': row[11], 'criado_em': row[12], 'atualizado_em': row[13]
+                'prioridade': row[10], 'status': row[11], 'criado_em': row[12], 'atualizado_em': row[13], 'tipo_tarefa': row[14]
             }
         return None
     finally:
@@ -94,9 +94,9 @@ def create_tarefa(data):
         
         result = conn.run("""
             INSERT INTO tarefas (nome, descricao, link_externo, responsavel, participantes, equipes_envolvidas,
-                                 data_inicio, duracao_dias_uteis, data_fim, prioridade, status)
+                                 data_inicio, duracao_dias_uteis, data_fim, prioridade, status, tipo)
             VALUES (:nome, :descricao, :link_externo, :responsavel, :participantes, :equipes_envolvidas,
-                    :data_inicio, :duracao_dias_uteis, :data_fim, :prioridade, :status)
+                    :data_inicio, :duracao_dias_uteis, :data_fim, :prioridade, :status, :tipo)
             RETURNING id
         """,
         nome=data['nome'],
@@ -109,7 +109,8 @@ def create_tarefa(data):
         duracao_dias_uteis=int(data['duracao_dias_uteis']),
         data_fim=data_fim,
         prioridade=data['prioridade'],
-        status=data['status']
+        status=data['status'],
+        tipo=data.get('tipo_tarefa', 'Normal')
         )
         return result[0][0]
     finally:
@@ -126,7 +127,7 @@ def update_tarefa(tarefa_id, data):
             SET nome = :nome, descricao = :descricao, link_externo = :link_externo,
                 responsavel = :responsavel, participantes = :participantes, equipes_envolvidas = :equipes_envolvidas,
                 data_inicio = :data_inicio, duracao_dias_uteis = :duracao_dias_uteis,
-                data_fim = :data_fim, prioridade = :prioridade, status = :status,
+                data_fim = :data_fim, prioridade = :prioridade, status = :status, tipo = :tipo,
                 atualizado_em = CURRENT_TIMESTAMP
             WHERE id = :id
         """,
@@ -141,6 +142,7 @@ def update_tarefa(tarefa_id, data):
         duracao_dias_uteis=int(data['duracao_dias_uteis']),
         data_fim=data_fim,
         prioridade=data['prioridade'],
+        tipo=data.get('tipo_tarefa', 'Normal'),
         status=data['status']
         )
     finally:
